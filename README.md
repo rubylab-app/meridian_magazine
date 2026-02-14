@@ -1,6 +1,6 @@
 # Meridian Magazine — IronAdmin Demo Application
 
-A fully functional demo application showcasing [IronAdmin](https://github.com/RubyLabApp/iron_admin), a convention-over-configuration admin panel engine for Ruby on Rails.
+A fully functional demo application showcasing [IronAdmin](https://github.com/rubylab-app/iron_admin), a convention-over-configuration admin panel engine for Ruby on Rails.
 
 **Live Demo:** [demo.ironadmin.rubylab.app](https://demo.ironadmin.rubylab.app)
 
@@ -34,7 +34,7 @@ Key principles:
 - **Convention over configuration** — sensible defaults, override only what you need
 - **Fully integrated** — works with Active Storage, Action Text, and your existing auth system
 
-Learn more at the [IronAdmin GitHub repository](https://github.com/RubyLabApp/iron_admin).
+Learn more at the [IronAdmin GitHub repository](https://github.com/rubylab-app/iron_admin).
 
 ---
 
@@ -315,7 +315,7 @@ db/
 ## Run It Locally
 
 ```bash
-git clone https://github.com/RubyLabApp/meridian_magazine.git
+git clone https://github.com/rubylab-app/meridian_magazine.git
 cd meridian_magazine
 bundle install
 bin/rails db:prepare
@@ -348,4 +348,4 @@ For automated resets (e.g., on a deployed demo), use the included script with cr
 
 This demo application is open source under the [MIT License](https://opensource.org/licenses/MIT).
 
-For the IronAdmin gem license, see the [IronAdmin repository](https://github.com/RubyLabApp/iron_admin).
+For the IronAdmin gem license, see the [IronAdmin repository](https://github.com/rubylab-app/iron_admin).
