@@ -40,4 +40,8 @@ cookie.txt
 /app/assets/tailwind/iron_admin.css
 /app/assets/builds/tailwind/
 
+# Kamal deployment (contains server IPs and secrets)
+/config/deploy.yml
+/.kamal/secrets
+
 .mcp.json

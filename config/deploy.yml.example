@@ -1,0 +1,42 @@
+service: meridian-magazine
+
+image: ghcr.io/rubylab-app/meridian_magazine
+
+servers:
+  web:
+    hosts:
+      - YOUR_DROPLET_IP
+    cmd: bin/rails server -b 0.0.0.0 -p 3000
+  cron:
+    hosts:
+      - YOUR_DROPLET_IP
+    cmd: bash -c "while true; do sleep 21600 && bin/rails demo:reset; done"
+    proxy: false
+
+proxy:
+  ssl: true
+  host: demo.ironadmin.rubylab.app
+  app_port: 3000
+
+registry:
+  server: ghcr.io
+  username: rubylab-app
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+env:
+  clear:
+    RAILS_ENV: production
+    RAILS_LOG_TO_STDOUT: "1"
+    RAILS_SERVE_STATIC_FILES: "1"
+  secret:
+    - RAILS_MASTER_KEY
+
+volumes:
+  - "meridian_magazine_storage:/rails/storage"
+  - "meridian_magazine_db:/rails/db"
+
+asset_path: /rails/public/assets
+
+builder:
+  arch: amd64
