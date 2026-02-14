@@ -1,6 +1,6 @@
 service: meridian-magazine
 
-image: ghcr.io/rubylab-app/meridian_magazine
+image: rubylab-app/meridian_magazine
 
 servers:
   web:
