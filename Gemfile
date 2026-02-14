@@ -31,6 +31,9 @@ gem "tzinfo-data", platforms: %i[windows jruby]
 gem "solid_cache"
 gem "solid_queue"
 
+# Application monitoring and error tracking
+gem "appsignal"
+
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
