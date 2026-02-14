@@ -1,5 +1,6 @@
-PATH
-  remote: ../iron_admin
+GIT
+  remote: https://github.com/rubylab-app/iron_admin.git
+  revision: 25ee7bcb7f187715b4d0e2c63f9c40dec015cd04
   specs:
     iron_admin (0.4.0)
       haml-rails (>= 2.0)

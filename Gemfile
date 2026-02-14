@@ -19,7 +19,7 @@ gem "stimulus-rails"
 gem "tailwindcss-rails"
 
 # IronAdmin admin panel
-gem "iron_admin", path: "../iron_admin"
+gem "iron_admin", github: "rubylab-app/iron_admin"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
