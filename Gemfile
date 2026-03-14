@@ -50,7 +50,7 @@ end
 
 group :test do
   gem "capybara", "~> 3.40"
-  gem "rspec-rails", "~> 7.0"
+  gem "rspec-rails", "~> 8.0"
   gem "selenium-webdriver", "~> 4.0"
 end
 
