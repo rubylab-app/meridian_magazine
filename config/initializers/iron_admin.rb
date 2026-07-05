@@ -16,6 +16,11 @@ IronAdmin.configure do |config|
 
   # Audit logging
   config.audit_enabled = true
+  config.audit_storage = :database
+
+  # 0.6.0 live updates demo: dashboard metrics/charts opt in per widget.
+  config.live_updates = :polling
+  config.live_poll_interval = 5.seconds
 
   # Theme customization - dark indigo sidebar
   config.theme do |t|

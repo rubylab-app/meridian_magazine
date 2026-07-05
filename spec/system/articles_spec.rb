@@ -73,7 +73,7 @@ RSpec.describe "Articles Management", type: :system do
       visit "/admin/articles/new"
 
       expect(page).to have_field("Title")
-      expect(page).to have_field("Body")
+      expect(page).to have_content("Body")
       expect(page).to have_field("Status")
     end
   end

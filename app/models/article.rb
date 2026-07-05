@@ -7,6 +7,8 @@ class Article < ApplicationRecord
   has_one_attached :cover_image
   has_many_attached :gallery
 
+  accepts_nested_attributes_for :comments, allow_destroy: true
+
   enum :status, { draft: 0, published: 1, archived: 2 }
 
   default_scope { where(deleted_at: nil) }

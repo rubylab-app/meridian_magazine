@@ -366,25 +366,25 @@ comment_bodies = {
 
 published_articles = Article.published.to_a
 
-published_articles.each do |article|
+published_articles.each_with_index do |article, article_index|
   # Each published article gets 2-6 comments
-  num_comments = rand(2..6)
+  num_comments = 2 + (article_index % 5)
 
   num_comments.times do |i|
-    commenter = commenters.sample
-    days_after_publish = rand(0..14)
+    commenter = commenters[(article_index + i) % commenters.size]
+    days_after_publish = (article_index + i) % 14
     commented_at = (article.published_at || article.created_at) + days_after_publish.days
 
     # Determine comment type and status
     if i < num_comments - 1
       # Most comments are approved positive or constructive
-      body_pool = rand < 0.6 ? comment_bodies[:positive] : comment_bodies[:constructive]
+      body_pool = (article_index + i).even? ? comment_bodies[:positive] : comment_bodies[:constructive]
       status = :approved
-    elsif rand < 0.3
+    elsif article_index % 4 == 0
       # Some pending questions
       body_pool = comment_bodies[:questions]
       status = :pending
-    elsif rand < 0.15
+    elsif article_index % 7 == 0
       # Occasional spam (rejected)
       body_pool = comment_bodies[:spam]
       status = :rejected
@@ -397,28 +397,30 @@ published_articles.each do |article|
     Comment.unscoped.find_or_create_by!(
       article: article,
       author_email: commenter[:email],
-      body: body_pool.sample,
-      created_at: commented_at
+      body: body_pool[(article_index + i) % body_pool.size]
     ) do |c|
       c.author_name = commenter[:name]
       c.status = status
+      c.created_at = commented_at
+      c.updated_at = commented_at
       c.deleted_at = deleted ? rand(1..30).days.ago : nil
     end
   end
 end
 
 # Add a couple of soft-deleted comments
-2.times do
-  article = published_articles.sample
-  commenter = commenters.sample
-  Comment.unscoped.create!(
+2.times do |i|
+  article = published_articles[i]
+  commenter = commenters[-(i + 1)]
+  Comment.unscoped.find_or_create_by!(
     article: article,
-    author_name: commenter[:name],
-    author_email: "deleted-#{commenter[:email]}",
-    body: "This comment was removed for violating community guidelines.",
-    status: :rejected,
-    deleted_at: rand(1..30).days.ago
-  )
+    author_email: "deleted-comment-#{i + 1}@example.com"
+  ) do |c|
+    c.author_name = commenter[:name]
+    c.body = "This comment was removed for violating community guidelines."
+    c.status = :rejected
+    c.deleted_at = (i + 1).days.ago
+  end
 end
 
 puts "  Created #{Comment.unscoped.count} comments (#{Comment.unscoped.where.not(deleted_at: nil).count} soft-deleted)"
