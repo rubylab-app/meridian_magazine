@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "./iron_admin";
+@import "../builds/tailwind/iron_admin";
 
 /* Scan the host app's resource definitions */
 @source "../../iron_admin/**/*.rb";

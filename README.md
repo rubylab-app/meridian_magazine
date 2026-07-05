@@ -6,7 +6,7 @@ A fully functional demo application showcasing [IronAdmin](https://github.com/ru
 
 | Ruby | Rails | IronAdmin |
 |------|-------|-----------|
-| 3.2+ | 8.0+  | Latest    |
+| 3.4+ | 8.1+  | 0.6.0     |
 
 ---
 
@@ -40,7 +40,7 @@ Learn more at the [IronAdmin GitHub repository](https://github.com/rubylab-app/i
 
 ## Features Demonstrated
 
-This demo covers the full IronAdmin feature set across 9 resources, a custom dashboard, and a custom tool.
+This demo covers the IronAdmin 0.6.0 feature set across 9 resources, a custom dashboard, and a custom tool.
 
 ### Resources & Field Types
 
@@ -55,12 +55,15 @@ This demo covers the full IronAdmin feature set across 9 resources, a custom das
 | Color picker | Category color | `CategoryResource` |
 | Currency formatting | Sponsorship amount | `NewsletterResource` |
 | Textarea | Excerpt, bio, comment body | Multiple |
+| Inline nested forms | Edit article comments inside the article form | `ArticleResource` |
 
 ### Search, Filters & Scopes
 
 | Feature | Example |
 |---------|---------|
 | Full-text search | Search articles by title, body, and excerpt |
+| String operator filters | Filter articles, users, categories, tags, and settings by text fields |
+| Number operator filters | Filter newsletters by recipient count and pages/categories by position |
 | Select filters | Filter by status, category, role |
 | Boolean filters | Filter by featured, active, confirmed |
 | Date range filters | Filter by published_at, created_at |
@@ -72,22 +75,26 @@ This demo covers the full IronAdmin feature set across 9 resources, a custom das
 | Feature | Example |
 |---------|---------|
 | Single-record actions | Publish, archive, feature an article |
+| Action forms | Publish with date/featured, archive with note, reject with moderation note |
 | Actions with confirmation | "Are you sure?" before publishing |
 | Custom confirmation messages | Newsletter send confirmation |
-| Bulk actions | Publish/archive multiple articles at once |
+| Bulk action forms | Publish/archive multiple articles with collected input |
 
 ### Dashboard, Auth & More
 
 | Feature | Example |
 |---------|---------|
 | Dashboard metrics | Total articles, subscribers, pending comments |
-| Dashboard charts (bar & pie) | Articles per month, articles by category |
+| Dashboard metric icons | Heroicons on every metric card |
+| Live dashboard polling | Metrics and charts opt into polling updates |
+| Dashboard charts with labels | Articles per month, articles by category, newsletter status |
 | Recent records widget | Latest articles, pending comments |
 | Policy-based authorization | Role-based access (admin/editor/author) |
 | Theme customization | Dark indigo sidebar theme |
 | Menu groups & icons | Content, Community, Settings groups |
 | Audit logging | Track all admin actions |
 | CSV & JSON exports | Export subscribers |
+| CSV & JSON imports with upsert | Import subscribers, categories, and tags |
 | Association autocomplete | Author selection on articles |
 | Soft deletes | Articles and comments with `deleted_at` |
 | Custom tools | Sign Out tool in sidebar |
@@ -119,7 +126,7 @@ In `config/routes.rb`, mount the admin panel at your preferred path:
 
 ```ruby
 Rails.application.routes.draw do
-  mount IronAdmin::Engine => "/admin"
+  mount IronAdmin::Engine, at: "/admin"
 end
 ```
 
@@ -145,116 +152,158 @@ end
 
 ### 4. Create Your First Resource
 
-Create a file in `app/iron_admin/` for each model you want to manage. For example, `app/iron_admin/article_resource.rb`:
+Create a file in `app/iron_admin/resources/` for each model you want to manage. For example, `app/iron_admin/resources/article_resource.rb`:
 
 ```ruby
-class ArticleResource < IronAdmin::Resource
-  # Associations
-  belongs_to :user, autocomplete: true, display: :name
-  belongs_to :category, display: :name
-  has_many :comments
+module IronAdmin
+  module Resources
+    class ArticleResource < IronAdmin::Resource
+      # Associations
+      belongs_to :user, autocomplete: true, display: :name
+      belongs_to :category, display: :name
+      has_many :comments, nested: true, allow_destroy: true,
+                          fields: %i[author_name author_email body status]
 
-  # Field type customization
-  field :status, type: :badge, colors: { draft: :yellow, published: :green, archived: :gray }
-  field :featured, type: :boolean
-  field :excerpt, type: :textarea
-  field :body, type: :rich_text
-  field :cover_image, type: :file
-  field :gallery, type: :files
+      # Field type customization
+      field :status, type: :badge, colors: { draft: :yellow, published: :green, archived: :gray }
+      field :featured, type: :boolean
+      field :excerpt, type: :textarea
+      field :body, type: :rich_text
+      field :cover_image, type: :file
+      field :gallery, type: :files
 
-  # Search configuration
-  searchable :title, :body, :excerpt
+      # Search configuration
+      searchable :title, :body, :excerpt
 
-  # Filters
-  filter :status, type: :select
-  filter :category_id, type: :select
-  filter :featured, type: :boolean
-  filter :published_at, type: :date_range
+      # Filters
+      filter :title, type: :string
+      filter :status, type: :select
+      filter :category_id, type: :select
+      filter :featured, type: :boolean
+      filter :published_at, type: :date_range
 
-  # Scopes — appear as tabs above the data table
-  scope :draft, -> { where(status: :draft) }
-  scope :published, -> { where(status: :published) }
-  scope :archived, -> { where(status: :archived) }
-  scope :featured, -> { where(featured: true) }
+      # Scopes appear as tabs above the data table
+      scope :draft, -> { where(status: :draft) }
+      scope :published, -> { where(status: :published) }
+      scope :archived, -> { where(status: :archived) }
+      scope :featured, -> { where(featured: true) }
 
-  # Single-record actions
-  action :publish, icon: "check-circle", confirm: true do |article|
-    article.update!(status: :published, published_at: Time.current)
+      # Single-record action with an action form
+      action :publish,
+             icon: "check-circle",
+             confirm: true,
+             form_fields: [
+               action_field(:published_at, type: :datetime, label: "Publish at"),
+               action_field(:featured, type: :boolean, label: "Feature this article")
+             ] do |article, params|
+        article.update!(
+          status: :published,
+          published_at: Time.zone.parse(params[:published_at].presence || Time.current.to_s),
+          featured: ActiveModel::Type::Boolean.new.cast(params[:featured])
+        )
+      end
+
+      action :archive,
+             icon: "archive-box",
+             confirm: true,
+             form_fields: [
+               action_field(:reason, type: :textarea, required: true, label: "Archive note")
+             ] do |article, params|
+        excerpt = [article.excerpt, "Archive note: #{params[:reason]}"].compact.join("\n\n")
+        article.update!(status: :archived, excerpt: excerpt)
+      end
+
+      action :feature, icon: "star" do |article|
+        article.update!(featured: !article.featured)
+      end
+
+      # Bulk actions can collect input too
+      bulk_action :publish,
+                  icon: "check-circle",
+                  form_fields: [
+                    action_field(:published_at, type: :datetime, label: "Publish at")
+                  ] do |articles, params|
+        articles.update_all(status: Article.statuses[:published], published_at: params[:published_at].presence || Time.current)
+      end
+
+      bulk_action :archive,
+                  icon: "archive-box",
+                  form_fields: [
+                    action_field(:reason, type: :textarea, required: true, label: "Archive note")
+                  ] do |articles, params|
+        articles.find_each do |article|
+          excerpt = [article.excerpt, "Archive note: #{params[:reason]}"].compact.join("\n\n")
+          article.update!(status: :archived, excerpt: excerpt)
+        end
+      end
+
+      # Control which fields appear in each context
+      index_fields :id, :title, :status, :category, :user, :featured, :published_at
+      form_fields :title, :excerpt, :body, :status, :featured, :published_at,
+                  :user, :category, :comments, :cover_image, :gallery
+      export_fields :id, :title, :status, :category, :user, :featured, :published_at, :created_at
+
+      # Eager-load associations for the index view
+      preload :user, :category
+
+      # Sidebar menu configuration
+      menu icon: "document-text", priority: 1, group: "Content"
+    end
   end
-
-  action :archive, icon: "archive-box", confirm: true do |article|
-    article.update!(status: :archived)
-  end
-
-  action :feature, icon: "star" do |article|
-    article.update!(featured: !article.featured)
-  end
-
-  # Bulk actions
-  bulk_action :publish, icon: "check-circle" do |articles|
-    articles.update_all(status: :published, published_at: Time.current)
-  end
-
-  bulk_action :archive, icon: "archive-box" do |articles|
-    articles.update_all(status: :archived)
-  end
-
-  # Control which fields appear in each context
-  index_fields :id, :title, :status, :category, :user, :featured, :published_at
-  form_fields :title, :excerpt, :body, :status, :featured, :published_at, :user, :category, :cover_image, :gallery
-  export_fields :id, :title, :status, :category, :user, :published_at, :created_at
-
-  # Eager-load associations for the index view
-  preload :user, :category
-
-  # Sidebar menu configuration
-  menu icon: "document-text", priority: 1, group: "Content"
 end
 ```
 
-That's it. IronAdmin generates the full CRUD interface — index with pagination, show page, create/edit forms, search, filters, and actions.
+That's it. IronAdmin generates the full CRUD interface: index with pagination, show page, create/edit forms, search, filters, and actions.
 
 ### 5. Add Authorization (Optional)
 
 Define policies directly in the resource to control access per role:
 
 ```ruby
-class UserResource < IronAdmin::Resource
-  policy do
-    allow :read
-    allow :create, :update, if: ->(user) { user.admin? || user.editor? }
-    allow :delete, if: ->(user) { user.admin? }
+module IronAdmin
+  module Resources
+    class UserResource < IronAdmin::Resource
+      policy do
+        allow :read
+        allow :create, :update, if: ->(user) { user.admin? || user.editor? }
+        allow :delete, if: ->(user) { user.admin? }
+      end
+    end
   end
 end
 ```
 
 ### 6. Build a Dashboard (Optional)
 
-Create `app/iron_admin/admin_dashboard.rb`:
+Create `app/iron_admin/dashboards/admin_dashboard.rb`:
 
 ```ruby
-class AdminDashboard < IronAdmin::Dashboard
-  metric :total_articles, format: :number do
-    Article.count
-  end
+module IronAdmin
+  module Dashboards
+    class AdminDashboard < IronAdmin::Dashboard
+      metric :total_articles, format: :number, icon: "document-text", live: true do
+        Article.count
+      end
 
-  metric :total_subscribers, format: :number do
-    Subscriber.count
-  end
+      metric :total_subscribers, format: :number, icon: "user-group", live: true do
+        Subscriber.count
+      end
 
-  chart :articles_per_month, type: :bar do
-    6.downto(0).each_with_object({}) do |months_ago, data|
-      date = months_ago.months.ago
-      data[date.strftime("%B %Y")] = Article.published.where(published_at: date.all_month).count
+      chart :articles_per_month, type: :bar, label: "Published articles per month", live: true do
+        6.downto(0).each_with_object({}) do |months_ago, data|
+          date = months_ago.months.ago
+          data[date.strftime("%B %Y")] = Article.published.where(published_at: date.all_month).count
+        end
+      end
+
+      chart :articles_by_category, type: :pie, label: "Articles by category", live: true do
+        Category.joins(:articles).group("categories.name").count
+      end
+
+      recent :articles, limit: 5
+      recent :comments, limit: 5, scope: -> { where(status: :pending) }
     end
   end
-
-  chart :articles_by_category, type: :pie do
-    Category.joins(:articles).group("categories.name").count
-  end
-
-  recent :articles, limit: 5
-  recent :comments, limit: 5, scope: -> { where(status: :pending) }
 end
 ```
 
@@ -279,17 +328,19 @@ end
 
 ```
 app/
-├── iron_admin/                    # IronAdmin resource definitions
-│   ├── admin_dashboard.rb         # Dashboard: metrics, charts, recent records
-│   ├── article_resource.rb        # Full-featured: all field types, actions, filters
-│   ├── category_resource.rb       # Color picker, has_many association
-│   ├── comment_resource.rb        # Default scope, belongs_to, approve/reject actions
-│   ├── newsletter_resource.rb     # Currency field, deny_actions, custom confirmation
-│   ├── page_resource.rb           # Rich text (Action Text), draft/published scopes
-│   ├── site_setting_resource.rb   # Deny create/destroy, admin-only policy
-│   ├── subscriber_resource.rb     # CSV/JSON exports, bulk actions
-│   ├── tag_resource.rb            # Minimal resource (searchable only)
-│   ├── user_resource.rb           # Policy-based auth, password field, file upload
+├── iron_admin/                    # IronAdmin definitions
+│   ├── dashboards/
+│   │   └── admin_dashboard.rb     # Metrics, chart labels, live polling
+│   ├── resources/
+│   │   ├── article_resource.rb    # Nested forms, action forms, filters
+│   │   ├── category_resource.rb   # Color picker, import/upsert
+│   │   ├── comment_resource.rb    # Moderation action forms
+│   │   ├── newsletter_resource.rb # Currency field, action forms
+│   │   ├── page_resource.rb       # Rich text, string/number filters
+│   │   ├── site_setting_resource.rb
+│   │   ├── subscriber_resource.rb # CSV/JSON import/export
+│   │   ├── tag_resource.rb        # Import/upsert
+│   │   └── user_resource.rb       # Policy-based auth, password field, file upload
 │   └── tools/
 │       └── logout_tool.rb         # Custom tool: adds Sign Out to sidebar
 ├── controllers/

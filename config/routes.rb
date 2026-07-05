@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  mount IronAdmin::Engine => "/admin"
+  mount IronAdmin::Engine, at: "/admin"
 
   get "login", to: "sessions#new"
   post "login", to: "sessions#create"
