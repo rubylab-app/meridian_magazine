@@ -34,7 +34,7 @@ module IronAdmin
       policy do
         allow :read
         allow :create, :update, if: ->(user) { user.admin? || user.editor? }
-        allow :delete, if: ->(user) { user.admin? }
+        allow :delete, :deactivate, :activate, if: ->(user) { user.admin? }
       end
 
       menu icon: "users", priority: 1, group: "Settings"
