@@ -83,7 +83,7 @@ end
 puts "  Created #{Tag.count} tags"
 
 # =============================================================================
-# Articles — 30 realistic articles spread over 6 months
+# Articles — 22 realistic articles spread over 6 months
 # =============================================================================
 articles_data = [
   # --- PUBLISHED: Technology ---
@@ -125,7 +125,7 @@ articles_data = [
     body: "Nobody tells you what it's like to maintain an open source project that people actually use. The initial rush of stars and pull requests feels incredible. Then reality sets in: the issues pile up, the feature requests conflict with each other, and strangers on the internet have strong opinions about your API design.\n\nAfter three years of maintaining a Ruby gem with over 5,000 stars, here's what I've learned about surviving — and even enjoying — the experience.\n\nFirst, ruthlessly define your scope. The most dangerous words in open source are 'it would be nice if...' Every feature you add is a feature you maintain forever. Say no more than you say yes, and document why.\n\nSecond, invest in your test suite and CI pipeline. The only way to confidently merge pull requests from strangers is to have tests you trust. If a PR passes CI, it should be safe to merge. If it isn't, your CI is broken, not the PR.\n\nThird, write contributing guidelines that are honest about your response times and review process. Setting expectations upfront prevents frustration on both sides.\n\nFourth, take breaks. Open source guilt is real — the feeling that you should be triaging issues instead of living your life. The project will survive a week without your attention. If it won't, that's a bus factor problem, not a vacation problem.\n\nFinally, remember why you started. You built something useful. People depend on it. That's worth celebrating, even on the hard days.",
     status: :published, featured: false,
     user: :maria, category: :technology, tags: %i[open-source ruby],
-    published_at: 1.month.ago,
+    published_at: 2.months.ago,
   },
 
   # --- PUBLISHED: Design ---
@@ -143,7 +143,7 @@ articles_data = [
     body: "For decades, web typography was an afterthought. Designers picked from a handful of web-safe fonts, set a base size of 16px, and moved on. The web was for reading, but nobody optimized for it.\n\nThat era is over. Variable fonts, fluid type scales, and modern CSS have transformed web typography from a limitation into a superpower.\n\nVariable fonts are the single biggest advancement. Instead of loading four separate font files (regular, bold, italic, bold italic), you load one file that contains the entire design space. Want a weight of 450? Done. A width of 87%? No problem. This isn't just about file size savings — it's about typographic expression that was previously impossible.\n\nFluid type scales take responsive typography beyond breakpoints. Instead of jumping from 16px to 18px at 768px, your type size flows smoothly from small screens to large ones using CSS clamp(). The result is text that looks intentional at every viewport width.\n\nThe tooling has caught up too. Fontshare and Google Fonts offer high-quality variable fonts for free. Utopia generates fluid type scales with a visual calculator. And modern browsers support every feature you need.\n\nThe impact on reading experience is measurable. Sites with well-tuned typography see longer session durations, lower bounce rates, and higher engagement. When text is comfortable to read, people read more of it.",
     status: :published, featured: false,
     user: :maria, category: :design, tags: %i[typography css],
-    published_at: 2.weeks.ago,
+    published_at: 5.months.ago,
   },
 
   # --- PUBLISHED: Business ---
@@ -161,7 +161,7 @@ articles_data = [
     body: "The great remote work experiment of 2020 has produced enough data to settle the debate. Distributed teams that invest in asynchronous communication, clear documentation, and outcome-based management consistently outperform their in-office counterparts on every metric that matters.\n\nThe evidence is compelling. GitLab, a fully remote company with over 2,000 employees across 65 countries, ships software faster than most companies a fraction of their size. Their secret isn't a magic tool — it's a 2,000-page handbook that documents every process, decision, and cultural norm.\n\nThe key insight is that remote work doesn't fail because of distance. It fails because of poor communication. And poor communication isn't solved by forcing people into an office — it's solved by writing things down.\n\nThe best remote teams share several practices. They default to asynchronous communication, reserving synchronous meetings for discussions that genuinely benefit from real-time interaction. They document decisions, not just outcomes. They use video sparingly and intentionally. And they measure results, not hours.\n\nThe companies dragging employees back to offices aren't responding to data. They're responding to a loss of control. When managers can't see people working, they assume people aren't working. This says more about management philosophy than productivity.\n\nThe future belongs to companies that trust their people. The data is clear.",
     status: :published, featured: false,
     user: :carlos, category: :business, tags: %i[remote-work startup],
-    published_at: 3.weeks.ago,
+    published_at: 3.months.ago,
   },
 
   # --- PUBLISHED: Science ---
@@ -189,7 +189,7 @@ articles_data = [
     body: "Something remarkable is happening in publishing. Translated fiction, long relegated to a tiny niche of the English-language market, is experiencing unprecedented growth. Sales of translated novels have doubled in the past five years, and authors like Han Kang, Olga Tokarczuk, and Georgi Gospodinov have become genuine bestsellers.\n\nThe catalyst was simple: readers got bored. After decades of the same Anglo-American literary conventions — the Brooklyn novel, the campus novel, the autofiction memoir — readers wanted something genuinely different. They found it in Korean, Japanese, Latin American, and Eastern European fiction.\n\nThe internet accelerated the trend. BookTok's algorithm doesn't care about nationality, and when a Korean novel goes viral, millions of English-speaking readers discover it simultaneously. Publishers, who had been cautious about translation rights, are now aggressively acquiring them.\n\nBut the boom is about more than novelty. Translated fiction offers something that domestic literature increasingly lacks: genuine surprise. Different literary traditions have different assumptions about narrative structure, character development, and what fiction is for. A Japanese novel doesn't feel like an American novel set in Tokyo. It feels like a different way of seeing the world.\n\nThe implications for the publishing industry are significant. Translators, long the most undervalued professionals in the literary world, are finally getting credit and better compensation. Small presses that specialize in translation are thriving. And the definition of 'world literature' is expanding beyond the Western canon.",
     status: :published, featured: false,
     user: :maria, category: :culture, tags: [:productivity],
-    published_at: 12.days.ago,
+    published_at: 6.months.ago,
   },
 
   # --- PUBLISHED: Lifestyle ---
@@ -207,7 +207,7 @@ articles_data = [
     body: "Steve Jobs famously preferred walking meetings. So did Aristotle, who taught while walking the grounds of the Lyceum. Modern research suggests they were onto something: walking improves creative thinking by up to 60%, according to a Stanford study.\n\nThe mechanism is straightforward. Walking increases blood flow to the brain, which enhances cognitive function. But the benefits go beyond physiology. Walking meetings remove the social dynamics of a conference room — there's no head of the table, no power position, no laptop to hide behind.\n\nThe format naturally constrains meeting length. You agree to walk a specific route, and the meeting ends when the walk does. No one extends a walking meeting by 30 minutes. The physical act of walking also makes silence comfortable in a way that sitting across from someone doesn't.\n\nWalking meetings work best for one-on-ones and small group discussions. They're ideal for brainstorming, giving feedback, and making decisions. They're less suitable for anything requiring a screen, detailed documents, or more than four people.\n\nThe practical tips are simple: pick a quiet route with good sidewalks, keep the group small, assign someone to take notes immediately after, and don't schedule walking meetings back-to-back with sitting meetings (the context switch is jarring).\n\nI've been doing walking meetings for two years. My one-on-ones are more honest, my brainstorms more creative, and my afternoons more energized. Try it for a week.",
     status: :published, featured: false,
     user: :carlos, category: :lifestyle, tags: %i[productivity remote-work],
-    published_at: 2.weeks.ago,
+    published_at: 4.months.ago,
   },
 
   # --- DRAFT: Articles in progress ---
