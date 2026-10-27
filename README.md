@@ -27,7 +27,7 @@
   </a>
 </p>
 
-Meridian Magazine is a fictional online publication. Its whole admin, from the dashboard to the audit log, comes from IronAdmin 0.7.0 and about 390 lines of Ruby (blank lines and comments not counted): nine resource classes, one dashboard, one tool and an initializer. There are no admin controllers in this repository, and the only admin view is the Sign Out tool's page.
+Meridian Magazine is a fictional online publication. In this repository, its whole admin, from the dashboard to the audit log, comes from IronAdmin 0.7.0 and about 390 lines of Ruby (blank lines and comments not counted): nine resource classes, one dashboard, one tool and an initializer. There are no admin controllers in this repository, and the only admin view is the Sign Out tool's page.
 
 - [Try it live](#try-it-live)
 - [Screenshots](#screenshots)
@@ -43,6 +43,9 @@ Meridian Magazine is a fictional online publication. Its whole admin, from the d
 
 Open **[demo.ironadmin.rubylab.app](https://demo.ironadmin.rubylab.app/)** and pick a user. There are no passwords. Each user has a different role, so sign out (**Account → Sign Out** in the sidebar) and try the others.
 
+> [!NOTE]
+> The live demo is deployed separately from this repository (nothing deploys it on push), so it can run an older IronAdmin release than the code here. To see everything this README describes, [run it locally](#run-it-locally).
+
 | User | Role | Content<sup>1</sup> | Users | Site settings |
 |------|------|---------------------|-------|---------------|
 | **Ana García**<br>`ana@meridian.com` | `admin` | Full access | View, create, edit, delete, activate and deactivate | View and edit |
@@ -57,30 +60,20 @@ Every user can open the dashboard, the global search and the audit log at `/admi
 
 Things to try:
 
-- **Publish** or **Archive** an article. Publish asks for a date and whether to feature the article, Archive asks for a required note, and both changes show up in the audit log.
-- Select several comments and run **Bulk reject**, which asks for a rejection note.
-- Import subscribers from **Subscribers → Import**. The preview shows the column mapping and validates each row before anything is saved, and existing emails are updated instead of duplicated. A file like this one works:
-
-  ```csv
-  email,name,confirmed
-  lucia@example.com,Lucía Fernández,true
-  nadia@example.com,Nadia Rahman,false
-  ```
-
 - Type `title:rails` in the Articles search box to search one field, or search every resource from the navbar.
-- Sign in as María and open **Users**: there is no **New User** button, and `/admin/users/new` shows a 403 page inside the admin.
-- Narrow the window below 1024 px to get the off-canvas sidebar.
+- Open the **With deleted** and **Only deleted** tabs on Articles or Comments to see soft-deleted records.
+- Download the subscriber list from `/admin/subscribers/export?format=csv` (or `?format=json`).
 
 ## Screenshots
 
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/screenshots/articles-index-filters.png" alt="Articles index with scope tabs (Draft, Published, Archived, Featured, With deleted, Only deleted), green Published status badges, category links and the filter panel open with Contains operators and a Status filter set to Published">
+      <img src="docs/screenshots/articles-index-filters.png" alt="Articles index with scope tabs (Draft, Published, Archived, Featured, With deleted, Only deleted), green Published status badges, category links and the filter panel open: Body, Excerpt and Title filters with Contains operators and a Status filter set to Published">
       <br><sub><b>Articles:</b> scope tabs, status badges and operator filters</sub>
     </td>
     <td width="50%" valign="top">
-      <img src="docs/screenshots/subscribers-import-preview.png" alt="Preview Subscribers Import page: 3 rows detected, a column mapping of email, name and confirmed, and a table of three valid rows with an Import 3 rows button">
+      <img src="docs/screenshots/subscribers-import-preview.png" alt="Preview Subscribers Import page: 3 rows detected, a column mapping of email, name and confirmed, an Import 3 rows button and a table of three valid rows, the last one for new.reader1@gmail.com, a subscriber that already exists and will be updated">
       <br><sub><b>Import preview:</b> column mapping and per-row validation before saving</sub>
     </td>
   </tr>
@@ -99,11 +92,11 @@ Things to try:
 
 ## What this demo shows
 
-Everything below is configured in this repository. Each section starts with links to the IronAdmin guides that cover it.
+Everything below is configured in this repository. Each section starts with links to the IronAdmin guides that cover it, as of the `v0.7.0` tag.
 
 ### Resources and fields
 
-[Fields guide](https://rubylab-app.github.io/iron_admin/guides/fields/) · [Resource DSL: fields](https://rubylab-app.github.io/iron_admin/guides/resource-dsl/#fields)
+[Fields guide](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/fields.md) · [Resources guide: fields](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/resources.md#fields)
 
 | Feature | Where in the demo |
 |---------|-------------------|
@@ -122,15 +115,16 @@ Everything below is configured in this repository. Each section starts with link
 
 ### Search, filters and scopes
 
-[Search](https://rubylab-app.github.io/iron_admin/guides/resource-dsl/#search) · [Filters](https://rubylab-app.github.io/iron_admin/guides/resource-dsl/#filters) · [Scopes](https://rubylab-app.github.io/iron_admin/guides/resource-dsl/#scopes) · [Soft delete](https://rubylab-app.github.io/iron_admin/guides/resource-dsl/#soft-delete-support)
+[Search](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/resources.md#search) · [Filters](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/resources.md#filters) · [Scopes](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/resources.md#scopes) · [Soft delete](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/resources.md#soft-delete-support)
 
 | Feature | Where in the demo |
 |---------|-------------------|
 | Index search | Every resource declares `searchable`; articles search title, body and excerpt |
 | Field queries | `title:rails` in the Articles search box matches titles only |
 | Global search | The navbar searches every resource the user can read; results show each record's title when it has one |
-| String filters with operators | One on every resource: article title, page title, user name, comment author email, newsletter subject, subscriber email, category name, tag name and slug, site setting key |
-| Number filters with operators | Newsletter recipients, page and category position |
+| Filters inferred from the schema | Every string and text column gets a string filter, and every numeric column that is not a foreign key or an enum gets a number filter: article body and excerpt in the screenshot, newsletter sponsorship amount. The password field `api_token` gets none |
+| Declared string filters with operators | Article title, page title, user name, comment author email, newsletter subject, subscriber email, category name, tag name and slug, site setting key |
+| Declared number filters with operators | Newsletter recipients, page and category position |
 | Select filters | Article status and category, page, comment and newsletter status, user role, site setting type |
 | Boolean filters | Article featured, user active, subscriber confirmed |
 | Date range filters | Article published at, comment created at, newsletter sent at, subscriber confirmed at |
@@ -140,7 +134,7 @@ Everything below is configured in this repository. Each section starts with link
 
 ### Actions
 
-[Record actions](https://rubylab-app.github.io/iron_admin/guides/resource-dsl/#record-actions) · [Action forms](https://rubylab-app.github.io/iron_admin/guides/resource-dsl/#action-forms) · [Bulk actions](https://rubylab-app.github.io/iron_admin/guides/resource-dsl/#bulk-actions)
+[Record actions](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/resources.md#record-actions) · [Action forms](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/resources.md#action-forms) · [Bulk actions](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/resources.md#bulk-actions)
 
 | Feature | Where in the demo |
 |---------|-------------------|
@@ -152,7 +146,7 @@ Everything below is configured in this repository. Each section starts with link
 
 ### Associations and nested forms
 
-[Associations](https://rubylab-app.github.io/iron_admin/guides/resource-dsl/#associations) · [Nested forms](https://rubylab-app.github.io/iron_admin/guides/resource-dsl/#nested-forms)
+[Associations](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/resources.md#associations) · [Nested forms](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/resources.md#nested-forms)
 
 | Feature | Where in the demo |
 |---------|-------------------|
@@ -164,7 +158,7 @@ Everything below is configured in this repository. Each section starts with link
 
 ### Dashboard
 
-[Dashboards guide](https://rubylab-app.github.io/iron_admin/guides/dashboards/)
+[Dashboard guide](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/dashboard.md)
 
 | Feature | Where in the demo |
 |---------|-------------------|
@@ -174,7 +168,7 @@ Everything below is configured in this repository. Each section starts with link
 
 ### Authorization
 
-[Authorization](https://rubylab-app.github.io/iron_admin/authorization/) · [Policies](https://rubylab-app.github.io/iron_admin/guides/resource-dsl/#policies) · [CRUD restrictions](https://rubylab-app.github.io/iron_admin/guides/resource-dsl/#crud-restrictions)
+[Authentication and authorization](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/authentication.md) · [Policies](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/resources.md#policies) · [CRUD restrictions](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/resources.md#crud-restrictions) · [403 and 404 pages](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/authentication.md#forbidden-and-not-found-pages)
 
 | Feature | Where in the demo |
 |---------|-------------------|
@@ -186,7 +180,7 @@ Everything below is configured in this repository. Each section starts with link
 
 ### Imports, exports and audit log
 
-[Imports & Exports](https://rubylab-app.github.io/iron_admin/imports-exports/) · [Configuration reference](https://rubylab-app.github.io/iron_admin/reference/)
+[Imports](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/imports.md) · [Exports](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/export.md) · [Audit logging](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/authentication.md#audit-logging) · [Configuration reference](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/reference/configuration.md)
 
 | Feature | Where in the demo |
 |---------|-------------------|
@@ -197,7 +191,7 @@ Everything below is configured in this repository. Each section starts with link
 
 ### Layout, theme and tools
 
-[Theming](https://rubylab-app.github.io/iron_admin/guides/theming/) · [Tools](https://rubylab-app.github.io/iron_admin/tools/)
+[Theming](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/theming.md) · [Custom tools](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/guides/extending.md#custom-tools)
 
 | Feature | Where in the demo |
 |---------|-------------------|
@@ -210,7 +204,7 @@ Everything below is configured in this repository. Each section starts with link
 
 ### New in IronAdmin 0.7.0
 
-The demo runs on 0.7.0, and these 0.7.0 changes are visible in it: the mobile layout, flash messages, 403 and 404 pages, buttons and show-page actions that follow the policy, the import preview (now usable from the UI, with upsert rows validated against the existing record), audit entries for bulk actions and imports with secrets masked, record titles in global search, and the custom `confirm_message` in action dialogs. See the [upgrade guide](https://rubylab-app.github.io/iron_admin/upgrade-guide/) for every change.
+This repository is on 0.7.0 (see [`Gemfile.lock`](Gemfile.lock)), and these 0.7.0 changes are visible when you run it: the mobile layout, flash messages, 403 and 404 pages, buttons and show-page actions that follow the policy, the import preview (now usable from the UI, with upsert rows validated against the existing record), audit entries for bulk actions and imports with secrets masked, record titles in global search, and the custom `confirm_message` in action dialogs. See the [upgrade guide](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/UPGRADING.md) for every change.
 
 ## Run it locally
 
@@ -230,6 +224,22 @@ bin/rails server
 - `bin/rails demo:reset` empties every table and loads the seeds again. [`script/reset_demo.sh`](script/reset_demo.sh) wraps it for cron and defaults to `RAILS_ENV=production`.
 - `bundle exec rspec` runs the system specs in [`spec/system`](spec/system). They use Capybara's `rack_test` driver, so no browser is needed.
 
+Things to try once it is running:
+
+- **Publish** or **Archive** an article. Publish asks for a date and whether to feature the article, Archive asks for a required note, and both changes show up in the audit log.
+- Select several comments and run **Bulk reject**, which asks for a rejection note.
+- Import subscribers from **Subscribers → Import**. The preview shows the column mapping and validates each row before anything is saved. Rows whose email already exists update that subscriber instead of creating a duplicate: in this file, the `new.reader1@gmail.com` row updates Jordan Lee, an unconfirmed subscriber from the seeds, and marks them as confirmed.
+
+  ```csv
+  email,name,confirmed
+  lucia@example.com,Lucía Fernández,true
+  nadia@example.com,Nadia Rahman,false
+  new.reader1@gmail.com,Jordan Lee,true
+  ```
+
+- Sign in as María and open **Users**: there is no **New User** button, and `/admin/users/new` shows a 403 page inside the admin.
+- Narrow the window below 1024 px to get the off-canvas sidebar.
+
 ## How it's built
 
 | Part | Where |
@@ -237,7 +247,7 @@ bin/rails server
 | Resources | [`app/iron_admin/resources/`](app/iron_admin/resources): [articles](app/iron_admin/resources/article_resource.rb), [pages](app/iron_admin/resources/page_resource.rb), [comments](app/iron_admin/resources/comment_resource.rb), [subscribers](app/iron_admin/resources/subscriber_resource.rb), [newsletters](app/iron_admin/resources/newsletter_resource.rb), [users](app/iron_admin/resources/user_resource.rb), [categories](app/iron_admin/resources/category_resource.rb), [tags](app/iron_admin/resources/tag_resource.rb), [site settings](app/iron_admin/resources/site_setting_resource.rb) |
 | Dashboard | [`app/iron_admin/dashboards/admin_dashboard.rb`](app/iron_admin/dashboards/admin_dashboard.rb) |
 | Tool | [`app/iron_admin/tools/logout_tool.rb`](app/iron_admin/tools/logout_tool.rb) and its view, [`app/views/iron_admin/tools/logout/show.html.erb`](app/views/iron_admin/tools/logout/show.html.erb) |
-| Policies | The `policy` blocks in [`user_resource.rb`](app/iron_admin/resources/user_resource.rb) and [`site_setting_resource.rb`](app/iron_admin/resources/site_setting_resource.rb); `deny_actions` there and in [`newsletter_resource.rb`](app/iron_admin/resources/newsletter_resource.rb) |
+| Policies | The `policy` blocks in [`user_resource.rb`](app/iron_admin/resources/user_resource.rb) and [`site_setting_resource.rb`](app/iron_admin/resources/site_setting_resource.rb); `deny_actions` in [`site_setting_resource.rb`](app/iron_admin/resources/site_setting_resource.rb) and [`newsletter_resource.rb`](app/iron_admin/resources/newsletter_resource.rb) |
 | Configuration: title, authentication, pagination, audit log, theme | [`config/initializers/iron_admin.rb`](config/initializers/iron_admin.rb) |
 | Engine mount at `/admin` and the login routes | [`config/routes.rb`](config/routes.rb) |
 | Demo login (pick a user, no password) | [`app/controllers/sessions_controller.rb`](app/controllers/sessions_controller.rb) and [`app/views/sessions/new.html.erb`](app/views/sessions/new.html.erb) |
@@ -293,7 +303,7 @@ To deploy your own copy:
 
 ## Use IronAdmin in your own app
 
-The [IronAdmin documentation](https://rubylab-app.github.io/iron_admin/) is the source of truth. Start with the [Installation guide](https://rubylab-app.github.io/iron_admin/getting-started/installation/) or the [Quick Start](https://rubylab-app.github.io/iron_admin/getting-started/quick-start/). IronAdmin 0.7.0 needs Ruby 3.3 or later, Rails 8.0.4 or later and `tailwindcss-rails` 4.3 or later. In short:
+The [IronAdmin documentation](https://rubylab-app.github.io/iron_admin/) is the source of truth. Start with the [Installation guide](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/getting-started/installation.md) or the [Quick Start](https://github.com/rubylab-app/iron_admin/blob/v0.7.0/docs/getting-started/quick-start.md). IronAdmin 0.7.0 needs Ruby 3.3 or later, Rails 8.0.4 or later and `tailwindcss-rails` 4.3 or later. In short:
 
 ```bash
 bundle add iron_admin
@@ -319,4 +329,4 @@ From there, the files in this repository are working examples: [action forms and
 
 ## License
 
-This demo application is open source under the [MIT License](https://opensource.org/licenses/MIT). For the IronAdmin gem license, see the [IronAdmin repository](https://github.com/rubylab-app/iron_admin).
+This demo application is open source under the [MIT License](MIT-LICENSE). For the IronAdmin gem license, see the [IronAdmin repository](https://github.com/rubylab-app/iron_admin).

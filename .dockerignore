@@ -42,6 +42,9 @@
 # Ignore development files
 /.devcontainer
 
+# Ignore repository docs (README screenshots)
+/docs/
+
 # Ignore Docker-related files
 /.dockerignore
 /Dockerfile*
