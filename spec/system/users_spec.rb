@@ -49,12 +49,46 @@ RSpec.describe "Users Management", type: :system do
         expect(page).to have_content("Ana García")
       end
 
-      it "shows new user button but policy prevents creation" do
+      it "hides the new user button" do
         visit "/admin/users"
 
-        # The "New User" button is visible because action_allowed? only checks
-        # deny_actions, not policy. The policy enforcement happens in the controller.
-        expect(page).to have_link("New User")
+        # IronAdmin 0.7 checks the resource policy, not only deny_actions,
+        # before rendering the New button.
+        expect(page).to have_no_link("New User")
+      end
+
+      it "forbids the new user form" do
+        visit "/admin/users/new"
+
+        expect(page.status_code).to eq(403)
+      end
+
+      it "hides the deactivate action" do
+        visit "/admin/users/#{User.find_by(role: :admin).id}"
+
+        expect(page).to have_no_button("Deactivate")
+      end
+    end
+
+    context "as editor" do
+      before { login_as(:editor) }
+
+      it "hides the deactivate action" do
+        visit "/admin/users/#{User.find_by(role: :admin).id}"
+
+        expect(page).to have_no_button("Deactivate")
+      end
+    end
+
+    context "as admin" do
+      before { login_as(:admin) }
+
+      it "deactivates a user" do
+        user = User.find_by(role: :author)
+        visit "/admin/users/#{user.id}"
+        click_button "Deactivate"
+
+        expect(user.reload.active).to be(false)
       end
     end
   end

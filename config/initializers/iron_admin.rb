@@ -28,7 +28,7 @@ IronAdmin.configure do |config|
     t.sidebar_bg = "bg-indigo-950"
     t.sidebar_title = "text-white font-bold"
     t.sidebar_link = "text-indigo-200 hover:text-white"
-    t.sidebar_link_hover = "bg-indigo-900 text-white"
+    t.sidebar_link_hover = "hover:bg-indigo-900 hover:text-white"
     t.sidebar_group_label = "text-indigo-400 uppercase text-xs font-semibold"
 
     t.btn_primary = "bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm"

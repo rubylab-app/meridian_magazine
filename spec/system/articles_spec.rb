@@ -87,6 +87,16 @@ RSpec.describe "Articles Management", type: :system do
     end
   end
 
+  describe "publish action" do
+    it "publishes a draft from the show page without the feature option" do
+      article = Article.draft.first
+      visit "/admin/articles/#{article.id}"
+      click_button "Publish"
+
+      expect(article.reload).to be_published
+    end
+  end
+
   describe "soft delete features" do
     it "shows with_deleted scope tab" do
       visit "/admin/articles"

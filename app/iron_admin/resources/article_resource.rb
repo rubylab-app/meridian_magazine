@@ -100,7 +100,7 @@ module IronAdmin
         end
 
         def truthy?(value)
-          ActiveModel::Type::Boolean.new.cast(value)
+          ActiveModel::Type::Boolean.new.cast(value) == true
         end
       end
     end
