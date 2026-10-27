@@ -6,7 +6,6 @@ servers:
   web:
     hosts:
       - YOUR_DROPLET_IP
-    cmd: bin/rails server -b 0.0.0.0 -p 3000
   cron:
     hosts:
       - YOUR_DROPLET_IP
@@ -34,7 +33,6 @@ env:
 
 volumes:
   - "meridian_magazine_storage:/rails/storage"
-  - "meridian_magazine_db:/rails/db"
 
 asset_path: /rails/public/assets
 

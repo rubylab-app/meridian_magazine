@@ -288,10 +288,10 @@ end
 
 The repository has a production [`Dockerfile`](Dockerfile) and a Kamal template, [`config/deploy.yml.example`](config/deploy.yml.example). There is no `config/deploy.yml`, and Kamal is not in the Gemfile. The template defines:
 
-- a `web` role running `bin/rails server -b 0.0.0.0 -p 3000` behind Kamal's proxy, with TLS (`proxy.ssl: true`) for `demo.ironadmin.rubylab.app`;
+- a `web` role running the image's default command, `./bin/rails server`, behind Kamal's proxy, with TLS (`proxy.ssl: true`) for `demo.ironadmin.rubylab.app`;
 - a `cron` role that runs `bin/rails demo:reset` every 6 hours;
 - the image `rubylab-app/meridian_magazine` on `ghcr.io`, built for `amd64`;
-- volumes for the SQLite databases (`/rails/db`) and Active Storage files (`/rails/storage`);
+- one volume, `/rails/storage`, for the SQLite databases and the Active Storage files;
 - the secrets `RAILS_MASTER_KEY` and `KAMAL_REGISTRY_PASSWORD`.
 
 To deploy your own copy:
@@ -299,7 +299,15 @@ To deploy your own copy:
 1. Install Kamal (`gem install kamal`) and copy the template to `config/deploy.yml`. Set the server IP, `proxy.host`, `image` and the registry username.
 2. `config/credentials.yml.enc` only opens with the maintainers' key. Create your own (`rm config/credentials.yml.enc && bin/rails credentials:edit`) and use the new `config/master.key` as `RAILS_MASTER_KEY`. Put both secrets in `.kamal/secrets`.
 3. Run `kamal setup`.
-4. The Docker entrypoint runs `db:prepare` only for the image's default command, `./bin/rails server`, and the template's `web` role adds flags to it. After the first deploy, prepare and seed the database once with `kamal app exec --roles=web --reuse "bin/rails db:prepare"`.
+4. Before the `web` role starts Puma, the Docker entrypoint runs `bin/rails db:prepare`. The first deploy creates and seeds the databases, and later deploys apply new migrations. The `cron` role does not run it.
+
+Earlier versions of the template also mounted a `<service>_db` volume at `/rails/db` and kept the databases there. That volume hid the image's `db/` directory, so new migrations and seeds never reached the container. To move an existing deployment to the current layout:
+
+1. From the running web container, copy each database (`production`, `production_cache` and `production_queue`) into the storage volume, for example with SQLite's `VACUUM INTO 'storage/production.sqlite3'`.
+2. Remove the `/rails/db` volume and the `web` role's `cmd` from your `config/deploy.yml`, then deploy.
+3. Open a page such as `/login`, because `/up` does not query the database.
+
+Keep the old volume until you are sure you won't roll back, because an image older than this layout still reads its databases from it.
 
 ## Use IronAdmin in your own app
 
