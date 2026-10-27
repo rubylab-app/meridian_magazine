@@ -6,7 +6,7 @@ A fully functional demo application showcasing [IronAdmin](https://github.com/ru
 
 | Ruby | Rails | IronAdmin |
 |------|-------|-----------|
-| 3.4+ | 8.1+  | 0.6.0     |
+| 3.4+ | 8.1+  | 0.7.0     |
 
 ---
 
@@ -40,7 +40,7 @@ Learn more at the [IronAdmin GitHub repository](https://github.com/rubylab-app/i
 
 ## Features Demonstrated
 
-This demo covers the IronAdmin 0.6.0 feature set across 9 resources, a custom dashboard, and a custom tool.
+This demo covers the IronAdmin 0.7.0 feature set across 9 resources, a custom dashboard, and a custom tool.
 
 ### Resources & Field Types
 
@@ -92,9 +92,11 @@ This demo covers the IronAdmin 0.6.0 feature set across 9 resources, a custom da
 | Policy-based authorization | Role-based access (admin/editor/author) |
 | Theme customization | Dark indigo sidebar theme |
 | Menu groups & icons | Content, Community, Settings groups |
-| Audit logging | Track all admin actions |
+| Audit logging | Track all admin actions, including bulk actions and imports; API tokens are stored as `[FILTERED]` |
 | CSV & JSON exports | Export subscribers |
 | CSV & JSON imports with upsert | Import subscribers, categories, and tags |
+| Import preview | Review the column mapping and each row before importing |
+| Mobile layout | Off-canvas sidebar drawer and scrolling tables below 1024px |
 | Association autocomplete | Author selection on articles |
 | Soft deletes | Articles and comments with `deleted_at` |
 | Custom tools | Sign Out tool in sidebar |
@@ -316,7 +318,7 @@ IronAdmin.configure do |config|
   config.theme do |t|
     t.sidebar_bg = "bg-indigo-950"
     t.sidebar_link = "text-indigo-200 hover:text-white"
-    t.sidebar_link_hover = "bg-indigo-900 text-white"
+    t.sidebar_link_hover = "hover:bg-indigo-900 hover:text-white"
     t.btn_primary = "bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm"
   end
 end
