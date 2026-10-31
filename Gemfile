@@ -7,7 +7,7 @@ gem "propshaft"
 # Use sqlite3 as the database for Active Record
 gem "sqlite3", ">= 2.1"
 # Use the Puma web server [https://github.com/puma/puma]
-gem "puma", "~> 7.2", ">= 7.2.1"
+gem "puma", "~> 8.0"
 # CSV import support on Ruby 3.4+
 gem "csv"
 # IronAdmin currently uses OpenStruct; keep it explicit for Ruby 3.4+.
